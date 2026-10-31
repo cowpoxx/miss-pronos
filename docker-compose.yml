@@ -1,0 +1,109 @@
+version: "3.8"
+
+services:
+  schema:
+    image: mfp-schema:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: builder
+    container_name: mfp-schema
+    env_file: .env.production
+    command: ["pnpm", "exec", "prisma", "db", "push", "--skip-generate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - mfp-net
+
+  app:
+    image: mfp-app:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: mfp-app
+    env_file: .env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ./app/uploads:/app/public/uploads
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      schema:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - mfp-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mfp-postgres
+    env_file: .env.production
+    environment:
+      - POSTGRES_DB=miss_france_pronos
+      - POSTGRES_USER=mfp_user
+      - POSTGRES_PASSWORD=***
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mfp_user -d miss_france_pronos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - mfp-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backup:
+    image: postgres:16-alpine
+    container_name: mfp-backup
+    env_file: .env.production
+    environment:
+      - PGPASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data:ro
+      - ./backups:/backups
+    entrypoint: |
+      sh -c "
+        apk add --no-cache gzip &&
+        while true; do
+          DATE=$$(date +%F_%H-%M)
+          pg_dump -h postgres -U mfp_user miss_france_pronos | gzip > /backups/mfp_$${DATE}.sql.gz
+          find /backups -name 'mfp_*.sql.gz' -mtime +30 -delete
+          echo \"Backup saved: mfp_$${DATE}.sql.gz\"
+          sleep 86400
+        done
+      "
+    depends_on:
+      - postgres
+    networks:
+      - mfp-net
+    restart: unless-stopped
+
+networks:
+  mfp-net:
+    driver: bridge
+    name: mfp-network

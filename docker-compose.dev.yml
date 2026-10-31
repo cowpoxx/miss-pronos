@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mfp-postgres
+    environment:
+      - POSTGRES_DB=miss_france_pronos
+      - POSTGRES_USER=mfp_user
+      - POSTGRES_PASSWORD=dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mfp_user -d miss_france_pronos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mfp-net
+
+  # Optionnel: pgAdmin pour dev
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mfp-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@local.dev
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - mfp-net
+
+volumes:
+  postgres_data:
+
+networks:
+  mfp-net:
+    driver: bridge
