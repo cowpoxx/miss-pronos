@@ -44,6 +44,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(ballot)
   } catch (error) {
     console.error(error)
-    return NextResponse.json({ error: 'Erreur lors de l'enregistrement' }, { status: 400 })
+    return NextResponse.json({ error: 'Erreur lors de l\'enregistrement' }, { status: 400 })
   }
 }

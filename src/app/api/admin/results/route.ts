@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     })
     if (!edition) return NextResponse.json({ error: 'Aucune édition active' }, { status: 404 })
     if (new Date() < edition.startDate) {
-      return NextResponse.json({ error: 'Tu pourras saisir les résultats après le début de l'élection.' }, { status: 409 })
+      return NextResponse.json({ error: 'Tu pourras saisir les résultats après le début de l\'élection.' }, { status: 409 })
     }
 
     const candidates = await prisma.candidate.findMany({
