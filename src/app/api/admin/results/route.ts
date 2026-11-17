@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { ADMIN_SESSION_COOKIE, isValidAdminSessionToken } from '@/lib/admin-auth'
-import { calculateTop5Score } from '@/lib/ballot'
-import { officialTop5Schema } from '@/lib/ballot-validation'
+import { calculateBallotScore } from '@/lib/ballot'
+import { officialResultSchema } from '@/lib/ballot-validation'
 
 export const runtime = 'nodejs'
 
@@ -29,11 +29,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Requête invalide' }, { status: 400 })
     }
 
-    const top5Parsed = officialTop5Schema.safeParse(
-      typeof body === 'object' && body !== null && 'top5' in body ? body.top5 : undefined,
+    const parsed = officialResultSchema.safeParse(
+      typeof body === 'object' && body !== null ? body : undefined,
     )
-    if (!top5Parsed.success) {
-      return NextResponse.json({ error: top5Parsed.error.issues[0]?.message ?? 'Top 5 invalide' }, { status: 400 })
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Résultats invalides' }, { status: 400 })
     }
 
     const edition = await prisma.edition.findFirst({
@@ -42,14 +42,14 @@ export async function POST(request: NextRequest) {
     })
     if (!edition) return NextResponse.json({ error: 'Aucune édition active' }, { status: 404 })
     if (new Date() < edition.startDate) {
-      return NextResponse.json({ error: 'Tu pourras saisir les résultats après le début de l’élection.' }, { status: 409 })
+      return NextResponse.json({ error: 'Tu pourras saisir les résultats après le début de l'élection.' }, { status: 409 })
     }
 
     const candidates = await prisma.candidate.findMany({
-      where: { editionId: edition.id, id: { in: top5Parsed.data } },
+      where: { editionId: edition.id, id: { in: [...parsed.data.top12, ...parsed.data.top5] } },
       select: { id: true },
     })
-    if (candidates.length !== 5) {
+    if (candidates.length !== 12) {
       return NextResponse.json({ error: 'Une candidate sélectionnée est invalide' }, { status: 400 })
     }
 
@@ -58,13 +58,15 @@ export async function POST(request: NextRequest) {
         where: { editionId: edition.id },
         create: {
           editionId: edition.id,
-          winnerId: top5Parsed.data[0],
-          top5: top5Parsed.data,
+          winnerId: parsed.data.top5[0],
+          top12: parsed.data.top12,
+          top5: parsed.data.top5,
           enteredById: null,
         },
         update: {
-          winnerId: top5Parsed.data[0],
-          top5: top5Parsed.data,
+          winnerId: parsed.data.top5[0],
+          top12: parsed.data.top12,
+          top5: parsed.data.top5,
           enteredById: null,
           enteredAt: new Date(),
         },
@@ -72,11 +74,15 @@ export async function POST(request: NextRequest) {
 
       const ballots = await tx.ballot.findMany({ where: { editionId: edition.id } })
       for (const ballot of ballots) {
-        const score = calculateTop5Score(idsFromJson(ballot.top5), top5Parsed.data)
+        const predictionTop12 = idsFromJson(ballot.top12)
+        const predictionTop5 = idsFromJson(ballot.top5)
+        const score = calculateBallotScore(
+          { top12: predictionTop12, top5: predictionTop5 },
+          { top12: parsed.data.top12, top5: parsed.data.top5 }
+        )
         const breakdown: Prisma.InputJsonValue = {
-          top5Contains: score.top5Contains,
-          exactPositions: score.exactPositions,
-          perfectTop5Bonus: score.perfectTop5Bonus,
+          top12Matches: score.top12Matches,
+          top5Points: score.top5Points,
           total: score.total,
         }
         await tx.ballot.update({ where: { id: ballot.id }, data: { points: score.total, breakdown } })

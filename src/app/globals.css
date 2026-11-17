@@ -4,40 +4,41 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 330 81% 60%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Theme Princesse - Palette Rose & Or Doux */
+    --background: 330 100% 99%;
+    --foreground: 330 40% 20%;
+    --primary: 330 70% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 60% 95%;
+    --secondary-foreground: 45 40% 20%;
+    --muted: 330 30% 96%;
+    --muted-foreground: 330 20% 45%;
+    --accent: 45 100% 60%;
+    --accent-foreground: 45 40% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 330 81% 60%;
-    --radius: 0.5rem;
+    --border: 330 30% 90%;
+    --input: 330 30% 90%;
+    --ring: 330 70% 60%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --primary: 330 81% 60%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 330 40% 4%;
+    --foreground: 330 10% 98%;
+    --primary: 330 60% 50%;
+    --primary-foreground: 330 10% 98%;
+    --secondary: 330 30% 10%;
+    --secondary-foreground: 330 10% 98%;
+    --muted: 330 30% 10%;
+    --muted-foreground: 330 10% 65%;
+    --accent: 45 60% 50%;
+    --accent-foreground: 330 10% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 330 81% 60%;
+    --destructive-foreground: 330 10% 98%;
+    --border: 330 30% 15%;
+    --input: 330 30% 15%;
+    --ring: 330 60% 50%;
   }
 }
 
@@ -47,6 +48,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: radial-gradient(circle at 50% 50%, hsl(var(--background)), hsl(var(--muted)));
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -55,22 +57,28 @@
   .text-balance {
     text-wrap: balance;
   }
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-lg dark:bg-black/70 dark:border-white/10;
+  }
+  .princess-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
 }
 
 @keyframes sparkle {
-  0%, 100% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 1; transform: scale(1); }
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-5px); }
 }
 
 .animate-sparkle {
-  animation: sparkle 2s ease-in-out infinite;
+  animation: sparkle 3s ease-in-out infinite;
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }

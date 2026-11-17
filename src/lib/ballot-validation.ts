@@ -1,13 +1,12 @@
 import { z } from 'zod'
 
-export const officialTop5Schema = z
-  .array(z.string().uuid())
-  .length(5, 'Le classement doit contenir exactement cinq candidates')
-  .refine((ids) => new Set(ids).size === 5, 'Chaque candidate ne peut apparaître qu’une fois')
+export const ballotSchema = z.object({
+  name: z.string().min(2, 'Le nom est trop court').max(50, 'Le nom est trop long'),
+  top12: z.array(z.string().uuid()).length(12, 'Il faut sélectionner exactement 12 candidates'),
+  top5: z.array(z.string().uuid()).length(5, 'Il faut classer exactement 5 candidates'),
+})
 
-export const ballotSubmissionSchema = z.object({
-  name: z.string().trim().min(2, 'Le nom doit contenir au moins deux caractères').max(50),
-  top5: officialTop5Schema,
-}).strict()
-
-export type BallotSubmission = z.infer<typeof ballotSubmissionSchema>
+export const officialResultSchema = z.object({
+  top12: z.array(z.string().uuid()).length(12, 'Il faut les 12 demi-finalistes'),
+  top5: z.array(z.string().uuid()).length(5, 'Il faut le classement des 5 finalistes'),
+})

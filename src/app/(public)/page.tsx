@@ -22,11 +22,12 @@ export default async function HomePage() {
   }
 
   const officialTop5 = edition.officialResult ? stringIds(edition.officialResult.top5) : null
+  const officialTop12 = edition.officialResult ? stringIds(edition.officialResult.top12) : null
   const revealedBallots = officialTop5
     ? await prisma.ballot.findMany({
         where: { editionId: edition.id },
         orderBy: [{ points: 'desc' }, { name: 'asc' }],
-        select: { name: true, top5: true, points: true },
+        select: { name: true, top12: true, top5: true, points: true },
       })
     : []
 
@@ -36,8 +37,10 @@ export default async function HomePage() {
       candidates={edition.candidates.map(({ id, number, name, region }) => ({ id, number, name, region }))}
       closed={Boolean(edition.officialResult) || new Date() >= edition.startDate}
       officialTop5={officialTop5}
+      officialTop12={officialTop12}
       revealedBallots={revealedBallots.map((ballot) => ({
         name: ballot.name,
+        top12: stringIds(ballot.top12),
         top5: stringIds(ballot.top5),
         points: ballot.points,
       }))}

@@ -1,7 +1,6 @@
-export interface Top5Score {
-  top5Contains: number
-  exactPositions: number
-  perfectTop5Bonus: number
+export interface BallotScore {
+  top12Matches: number
+  top5Points: number
   total: number
 }
 
@@ -13,33 +12,41 @@ export function canRevealBallots(isAdmin: boolean, resultsEntered: boolean): boo
   return isAdmin || resultsEntered
 }
 
-export function calculateTop5Score(
-  prediction: readonly string[],
-  official: readonly string[],
-): Top5Score {
-  if (
-    prediction.length !== 5 ||
-    official.length !== 5 ||
-    new Set(prediction).size !== 5 ||
-    new Set(official).size !== 5
-  ) {
-    return { top5Contains: 0, exactPositions: 0, perfectTop5Bonus: 0, total: 0 }
-  }
+/**
+ * Barème :
+ * - 12 candidates : 5 pts par candidate correcte dans la liste des 12.
+ * - Top 5 : 50, 40, 30, 20, 10 pts selon le rang (1er au 5ème).
+ * - Bonus Position Exacte : Les points du Top 5 sont doublés si la miss est au bon rang.
+ */
+export function calculateBallotScore(
+  prediction: { top12: string[], top5: string[] },
+  official: { top12: string[], top5: string[] }
+): BallotScore {
+  // 1. Points pour les 12 (5 pts par miss trouvée)
+  const top12MatchesCount = prediction.top12.filter(id => official.top12.includes(id)).length
+  const top12Points = top12MatchesCount * 5
 
-  const matches = prediction.filter((candidateId) => official.includes(candidateId)).length
-  const exactPositions = prediction.reduce(
-    (points, candidateId, index) => points + (official[index] === candidateId ? 15 : 0),
-    0,
-  )
-  const perfectTop5Bonus = prediction.every((candidateId, index) => official[index] === candidateId)
-    ? 30
-    : 0
-  const top5Contains = matches * 10
+  // 2. Points pour le Top 5
+  // Rang 0 (1ère) = 50, Rang 1 (2ème) = 40, etc.
+  const rankPoints = [50, 40, 30, 20, 10]
+  let top5Points = 0
+
+  prediction.top5.forEach((pId, pIdx) => {
+    if (!pId) return
+    const officialIdx = official.top5.indexOf(pId)
+    
+    if (officialIdx !== -1) {
+      // Elle est dans le Top 5 officiel
+      const basePoints = rankPoints[officialIdx]
+      const isExact = pIdx === officialIdx
+      
+      top5Points += isExact ? basePoints * 2 : basePoints
+    }
+  })
 
   return {
-    top5Contains,
-    exactPositions,
-    perfectTop5Bonus,
-    total: top5Contains + exactPositions + perfectTop5Bonus,
+    top12Matches: top12Points,
+    top5Points,
+    total: top12Points + top5Points
   }
 }

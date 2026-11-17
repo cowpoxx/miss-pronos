@@ -148,6 +148,7 @@ model Ballot {
   editionId      String   @map("edition_id")
   name           String
   normalizedName String   @map("normalized_name")
+  top12          Json     @default("[]")
   top5           Json     @default("[]")
   points         Int?
   breakdown      Json?
@@ -163,6 +164,7 @@ model Ballot {
 model OfficialResult {
   editionId   String   @id @map("edition_id")
   winnerId    String?  @map("winner_id")
+  top12       Json     @default("[]")
   top5        Json     @default("[]")
   enteredById String?  @map("entered_by_id")
   enteredAt   DateTime @default(now()) @map("entered_at")
