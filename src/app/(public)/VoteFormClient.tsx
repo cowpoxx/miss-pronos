@@ -47,7 +47,7 @@ export default function VoteFormClient({ editionTitle, candidates, closed, offic
     try {
       const response = await fetch('/api/ballots', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, top12, top5 }) })
       const data = await response.json()
-      if (!response.ok) throw new Error(data.error ?? 'Impossible d'enregistrer le pronostic')
+      if (!response.ok) throw new Error(data.error ?? "Impossible d'enregistrer le pronostic")
       setSuccess('Ton pronostic est enregistré ! Princesse !')
     } catch (error) { setError(error instanceof Error ? error.message : 'Erreur serveur') }
     finally { setBusy(false) }
