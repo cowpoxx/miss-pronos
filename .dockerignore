@@ -5,3 +5,7 @@ node_modules
 .env.*
 !.env.example
 public/uploads
+postgres
+backups
+app/uploads
+*.log
