@@ -15,7 +15,7 @@ COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile --prod
 
 # ──────────────────────────────────────────────
-# Builder
+# Builder (for app)
 # ──────────────────────────────────────────────
 FROM base AS builder
 RUN apk add --no-cache openssl python3 make g++   # Prisma/Next.js build needs these
@@ -23,6 +23,17 @@ COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
+
+# ──────────────────────────────────────────────
+# Schema (for migrations)
+# ──────────────────────────────────────────────
+FROM base AS schema
+RUN apk add --no-cache openssl libc6-compat python3 make g++   # Prisma needs openssl at runtime
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile --no-dev
+COPY prisma ./prisma
+COPY package.json .
+CMD ["pnpm", "exec", "prisma", "db", "push", "--skip-generate"]
 
 # ──────────────────────────────────────────────
 # Runner (production)

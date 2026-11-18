@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-      target: builder
+      target: schema
     container_name: mfp-schema
     env_file: .env.production
     command: ["pnpm", "exec", "prisma", "db", "push", "--skip-generate"]
