@@ -18,6 +18,7 @@ RUN pnpm install --frozen-lockfile --prod
 # Builder
 # ──────────────────────────────────────────────
 FROM base AS builder
+RUN apk add --no-cache openssl python3 make g++   # Prisma/Next.js build needs these
 COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
 COPY . .
