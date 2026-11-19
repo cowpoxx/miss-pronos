@@ -5,8 +5,7 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Seeding database...')
 
-  // Données de candidates 2025 réutilisées provisoirement pour l'édition 2027.
-  // Date provisoire pour l'édition simulée; à confirmer avant la mise en production.
+  // Candidates officielles Miss France 2027 (source: Wikipedia, élection 12 déc 2026)
   await prisma.edition.updateMany({
     where: { year: 2025 },
     data: { isActive: false },
@@ -30,36 +29,37 @@ async function main() {
   console.log(`✅ Édition créée: ${edition2027.title}`)
 
   const candidates2027 = [
-    { number: 1, name: 'Angélique Angarni-Filopon', region: 'Martinique' },
-    { number: 2, name: 'Mélissa Atta Bessiom', region: 'Guyane' },
-    { number: 3, name: 'Mélanie Billard', region: 'Côte d\'Azur' },
-    { number: 4, name: 'Mathilde Brosset', region: 'Île-de-France' },
-    { number: 5, name: 'Coralie Coquillard', region: 'Franche-Comté' },
-    { number: 6, name: 'Lucie Cotta', region: 'Midi-Pyrénées' },
-    { number: 7, name: 'Emma Da Silva', region: 'Rhône-Alpes' },
-    { number: 8, name: 'Maëva Debaud', region: 'Limousin' },
-    { number: 9, name: 'Lison Di Martino', region: 'Alsace' },
-    { number: 10, name: 'Marie Djouhri', region: 'Nord-Pas-de-Calais' },
-    { number: 11, name: 'Chloé Espina', region: 'Aquitaine' },
-    { number: 12, name: 'Lola Fauvel', region: 'Bretagne' },
-    { number: 13, name: 'Justine Godefroy', region: 'Normandie' },
-    { number: 14, name: 'Emma Grousset', region: 'Poitou-Charentes' },
-    { number: 15, name: 'Anaïs Hage', region: 'Centre-Val de Loire' },
-    { number: 16, name: 'Eva Labouret', region: 'Languedoc-Roussillon' },
-    { number: 17, name: 'Marine Le Bihan', region: 'Pays de la Loire' },
-    { number: 18, name: 'Solène Leluc', region: 'Bourgogne' },
-    { number: 19, name: 'Pauline Llorca', region: 'Provence' },
-    { number: 20, name: 'Ambre Luberriaga', region: 'Roussillon' },
-    { number: 21, name: 'Louise Marie', region: 'Réunion' },
-    { number: 22, name: 'Océane Menagé', region: 'Lorraine' },
-    { number: 23, name: 'Tiffany Merle', region: 'Champagne-Ardenne' },
-    { number: 24, name: 'Maëva Metayer', region: 'Orléanais' },
-    { number: 25, name: 'Juliette Miteau', region: 'Auvergne' },
-    { number: 26, name: 'Oriane Moulin', region: 'Franche-Comté' },
-    { number: 27, name: 'Méline Néry', region: 'Guadeloupe' },
-    { number: 28, name: 'Alexia Peltier', region: 'Tahiti' },
-    { number: 29, name: 'Audrey Raulin', region: 'Picardie' },
-    { number: 30, name: 'Cindy Vigneron', region: 'Dauphiné' },
+    { number: 1, name: 'Chiara Blazevic', region: 'Alsace' },
+    { number: 2, name: 'Solène Videau', region: 'Aquitaine' },
+    { number: 3, name: 'Lina Berthelier', region: 'Auvergne' },
+    { number: 4, name: 'Ilona Perrot', region: 'Bourgogne' },
+    { number: 5, name: 'Margot Ferré-Bernard', region: 'Bretagne' },
+    { number: 6, name: 'Justine Bourrelier', region: 'Centre-Val de Loire' },
+    { number: 7, name: 'Céline Leduc', region: 'Champagne-Ardenne' },
+    { number: 8, name: 'Satine Nomary', region: 'Corse' },
+    { number: 9, name: 'Camilla Alash', region: 'Côte d\'Azur' },
+    { number: 10, name: 'Marine Leberquier', region: 'Franche-Comté' },
+    { number: 11, name: 'Maureen-Alycia Lucéa-Merlin', region: 'Guadeloupe' },
+    { number: 12, name: 'Aïda Brou', region: 'Guyane' },
+    { number: 13, name: 'Alycia Bacha', region: 'Île-de-France' },
+    { number: 14, name: 'Myriam Stocco', region: 'Languedoc' },
+    { number: 15, name: 'Élise Escuriol', region: 'Limousin' },
+    { number: 16, name: 'Léane Froment', region: 'Lorraine' },
+    { number: 17, name: 'Clara Mévélec', region: 'Martinique' },
+    { number: 18, name: 'Zakia Hamidi', region: 'Mayotte' },
+    { number: 19, name: 'Carla Rachail', region: 'Midi-Pyrénées' },
+    { number: 20, name: 'Shana Mendes', region: 'Nord-Pas-de-Calais' },
+    { number: 21, name: 'Pauline Gourlez', region: 'Normandie' },
+    { number: 22, name: 'Élise Aulnette', region: 'Nouvelle-Calédonie' },
+    { number: 23, name: 'Maëlle Hamon', region: 'Pays de la Loire' },
+    { number: 24, name: 'Lou-Anne Lorphelin', region: 'Picardie' },
+    { number: 25, name: 'Mandy Goudal', region: 'Poitou-Charentes' },
+    { number: 26, name: 'Ophélie Vitalbo', region: 'Provence' },
+    { number: 27, name: 'Anisah Nassim', region: 'Réunion' },
+    { number: 28, name: 'Julia Grid-Constantino', region: 'Rhône-Alpes' },
+    { number: 29, name: 'Juliette Gauthier', region: 'Roussillon' },
+    { number: 30, name: 'Anais Vadeleux', region: 'Saint-Martin et Saint-Barthélemy' },
+    { number: 31, name: 'Leia Diard', region: 'Tahiti' },
   ]
 
   for (const candidate of candidates2027) {
